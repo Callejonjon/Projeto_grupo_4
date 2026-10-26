@@ -1,0 +1,123 @@
+"use client";
+import { useMemo, useState } from "react";
+import { CalendarDays, CheckCircle2, ExternalLink, Info, MapPin, Send, Sparkles } from "lucide-react";
+import { useStore } from "@/lib/store";
+import { EVENTS, MENTORS } from "@/lib/mock-data";
+import { mentorAffinity } from "@/lib/engine";
+import { MatchBadge, PageHeader, ProgressBar } from "@/components/ui";
+import type { EventItem } from "@/lib/types";
+import { fmtDay, fmtMonth, fmtTime } from "@/lib/format";
+
+const KINDS: (EventItem["kind"] | "Todos")[] = ["Todos", "Networking", "Bate-papo", "Liga Universitária", "Empresa Parceira"];
+
+export default function Mentoria() {
+  const { profile, skills, mentorRequests, requestMentor, journey } = useStore();
+  const [kind, setKind] = useState<(typeof KINDS)[number]>("Todos");
+  const [showRule, setShowRule] = useState(false);
+
+  const ranked = useMemo(
+    () => MENTORS.map((m) => mentorAffinity(profile, m, skills)).sort((a, b) => b.score - a.score),
+    [profile, skills]);
+  const events = EVENTS.filter((e) => (kind === "Todos" || e.kind === kind));
+
+  return (
+    <>
+      <PageHeader eyebrow="Etapa 3 · Mentoria e networking" title="Sua rede de apoio"
+        subtitle="Pareamento por critérios objetivos de afinidade: área de interesse, competências, trilha e objetivo de carreira." />
+
+      {!journey.stagesDone[2] && (
+        <p className="mb-6 flex items-start gap-2 rounded-xl bg-solar-400/15 p-3 text-sm text-slate-700">
+          <Sparkles size={16} className="mt-0.5 shrink-0 text-amber-600" />
+          Você já pode solicitar uma mentora! A Etapa 3 é concluída quando você termina a formação básica e tem uma mentoria solicitada.
+        </p>
+      )}
+
+      <section aria-labelledby="match-title">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 id="match-title" className="text-lg font-bold">Mentoras com maior afinidade</h2>
+          <button onClick={() => setShowRule((s) => !s)} className="flex items-center gap-1 text-sm font-semibold text-navy-800 hover:underline" aria-expanded={showRule}>
+            <Info size={16} /> Como calculamos?
+          </button>
+        </div>
+        {showRule && (
+          <div className="card mb-4 grid gap-3 p-4 text-sm sm:grid-cols-4">
+            {[["40 pts", "Área de interesse = especialidade da mentora"], ["25 pts", "Competências que você ainda não tem e ela ensina"], ["20 pts", "Experiência com a sua trilha (A ou B)"], ["15 pts", "Apoio ao seu objetivo de carreira"]].map(([p, t]) => (
+              <div key={p} className="rounded-xl bg-slate-50 p-3"><p className="font-extrabold text-pink-600">{p}</p><p className="text-slate-600">{t}</p></div>
+            ))}
+          </div>
+        )}
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {ranked.map(({ mentor, score, reasons }, i) => {
+            const requested = mentorRequests.includes(mentor.id);
+            return (
+              <article key={mentor.id} className={`card flex flex-col p-5 ${i === 0 ? "ring-2 ring-pink-400" : ""}`}>
+                {i === 0 && <span className="chip mb-3 w-fit bg-pink-500 text-white">★ Melhor match</span>}
+                <div className="flex items-center gap-3">
+                  <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-gradient-to-br from-pink-500 to-pink-600 text-lg font-bold text-white">{mentor.initials}</span>
+                  <div className="min-w-0">
+                    <h3 className="font-bold">{mentor.mentor_name}</h3>
+                    <p className="text-xs text-slate-500">{mentor.mentor_role}</p>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center gap-3">
+                  <ProgressBar value={score} label={`Afinidade com ${mentor.mentor_name}`} className="flex-1" />
+                  <MatchBadge pct={score} label="" />
+                </div>
+                <p className="mt-3 text-sm text-slate-600">{mentor.bio}</p>
+                <ul className="mt-3 flex-1 space-y-1">
+                  {reasons.map((r) => <li key={r} className="flex gap-1.5 text-xs text-slate-700"><CheckCircle2 size={14} className="mt-0.5 shrink-0 text-solar-500" /> {r}</li>)}
+                </ul>
+                <div className="mt-3 flex flex-wrap gap-1">
+                  <span className="chip bg-navy-800/10 text-navy-800">{mentor.specialty}</span>
+                  {mentor.match_tags.map((t) => <span key={t} className="chip bg-slate-100 text-slate-600">{t}</span>)}
+                </div>
+                <button className={requested ? "btn-secondary mt-4" : "btn-primary mt-4"} disabled={requested} onClick={() => requestMentor(mentor.id, score)}>
+                  {requested ? <><CheckCircle2 size={16} /> Solicitação enviada</> : <><Send size={16} /> Solicitar mentoria</>}
+                </button>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section aria-labelledby="ev-title" className="mt-12">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 id="ev-title" className="text-lg font-bold">Agenda e comunidade</h2>
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filtrar eventos">
+            {KINDS.map((k) => (
+              <button key={k} role="tab" aria-selected={kind === k} onClick={() => setKind(k)}
+                className={`chip border ${kind === k ? "border-navy-800 bg-navy-800 text-white" : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}>{k}</button>
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {events.map((e) => {
+            const recommended = profile.track_type ? e.tracks.includes(profile.track_type) : true;
+            return (
+              <article key={e.id} className="card flex gap-4 p-5">
+                <div className="grid h-16 w-14 shrink-0 place-content-center rounded-xl bg-navy-950 text-center text-white">
+                  <span className="text-xl font-extrabold leading-none">{fmtDay(e.starts_at)}</span>
+                  <span className="text-[10px] uppercase">{fmtMonth(e.starts_at)}</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap gap-1">
+                    <span className="chip bg-pink-100 text-pink-600">{e.kind}</span>
+                    {recommended && <span className="chip bg-solar-400/25 text-amber-700">Para sua trilha</span>}
+                  </div>
+                  <h3 className="mt-2 text-sm font-bold">{e.title}</h3>
+                  <p className="text-xs text-slate-500">{e.host}</p>
+                  <p className="mt-2 flex items-center gap-3 text-xs text-slate-500">
+                    <span className="flex items-center gap-1"><CalendarDays size={12} /> {fmtTime(e.starts_at)}</span>
+                    <span className="flex items-center gap-1 truncate"><MapPin size={12} /> {e.location}</span>
+                  </p>
+                  <a href={e.url} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-pink-600 hover:underline">Inscrever-se <ExternalLink size={12} /></a>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    </>
+  );
+}
