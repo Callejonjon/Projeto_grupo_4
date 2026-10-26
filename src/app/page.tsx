@@ -5,7 +5,7 @@ import { ArrowRight, Briefcase, CalendarDays, GraduationCap, Star, Users } from 
 import { useStore } from "@/lib/store";
 import { EVENTS, MENTORS } from "@/lib/mock-data";
 import { jobCompatibility, LEVEL_NAMES, levelProgress, mentorAffinity } from "@/lib/engine";
-import MarketTicker from "@/components/MarketTicker";
+import GiroMercado from "@/components/tickerdeindicadores";
 import JourneyStepper, { STAGES } from "@/components/JourneyStepper";
 import { MatchBadge, ProgressBar, TrackBadge } from "@/components/ui";
 import { fmtDayMonth } from "@/lib/format";
@@ -27,7 +27,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <MarketTicker />
+      <GiroMercado />
 
       {!onboarded && (
         <div className="card mb-6 flex flex-col items-start gap-3 border-pink-200 bg-pink-50 p-5 sm:flex-row sm:items-center sm:justify-between">
