@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { EVENTS, MENTORS } from "@/lib/mock-data";
 import { jobCompatibility, LEVEL_NAMES, levelProgress, mentorAffinity } from "@/lib/engine";
 import GiroMercado from "@/components/GiroMercado";
+import MuralVagas from "@/components/MuralVagas";
 import JourneyStepper, { STAGES } from "@/components/JourneyStepper";
 import { MatchBadge, ProgressBar, TrackBadge } from "@/components/ui";
 import { fmtDayMonth } from "@/lib/format";
@@ -128,6 +129,9 @@ export default function Dashboard() {
           <p className="mt-1 text-2xl font-extrabold">{journey.passed.size}<span className="text-base font-medium text-slate-400"> / {modules.length}</span></p>
           <ProgressBar value={(journey.passed.size / modules.length) * 100} label="Módulos concluídos" className="mt-2" />
         </section>
+      </div>
+      <div className="mt-8">
+        <MuralVagas />
       </div>
     </>
   );
