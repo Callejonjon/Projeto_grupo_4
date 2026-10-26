@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useStore, type ViewMode } from "@/lib/store";
 import { LEVEL_NAMES, levelProgress } from "@/lib/engine";
-import ChatBot from "./ChatBot";
+import Chatbot from "./Chatbot";
 import CelebrationOverlay from "./CelebrationOverlay";
 
 const STUDENT_NAV = [
@@ -132,7 +132,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <main id="conteudo" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">{children}</main>
 
-      {view === "aluna" && <ChatBot />}
+      {view === "aluna" && <Chatbot />}
       <CelebrationOverlay />
     </div>
   );
