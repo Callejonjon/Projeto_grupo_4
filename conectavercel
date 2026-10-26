@@ -1,0 +1,6 @@
+git init
+git add .
+git commit -m "feat: estrutura inicial da plataforma Grupo 4"
+git branch -M main
+git remote add origin https://github.com/callejonjon/grupo-4-galapagos.git
+git push -u origin main
