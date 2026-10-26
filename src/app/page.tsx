@@ -5,7 +5,7 @@ import { ArrowRight, Briefcase, CalendarDays, GraduationCap, Star, Users } from 
 import { useStore } from "@/lib/store";
 import { EVENTS, MENTORS } from "@/lib/mock-data";
 import { jobCompatibility, LEVEL_NAMES, levelProgress, mentorAffinity } from "@/lib/engine";
-import GiroMercado from "@/components/tickerdeindicadores";
+import GiroMercado from "@/components/GiroMercado";
 import JourneyStepper, { STAGES } from "@/components/JourneyStepper";
 import { MatchBadge, ProgressBar, TrackBadge } from "@/components/ui";
 import { fmtDayMonth } from "@/lib/format";
