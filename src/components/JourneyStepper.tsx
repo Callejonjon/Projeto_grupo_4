@@ -14,13 +14,18 @@ export const STAGES = [
 /** Mini-trilha horizontal com as 5 etapas (usada no Dashboard). */
 export default function JourneyStepper() {
   const { journey } = useStore();
+  // Linha de progresso entre o centro da 1ª e da 5ª coluna (10% → 90%)
+  const filled = journey.stagesDone[5] ? 4 : journey.currentStage - 1;
   return (
-    <ol className="grid grid-cols-5 gap-1 sm:gap-2" aria-label="Progresso nas 5 etapas">
+    <ol className="relative grid grid-cols-5 gap-1 sm:gap-2" aria-label="Progresso nas 5 etapas">
+      <span aria-hidden className="absolute left-[10%] right-[10%] top-5 h-1 -translate-y-1/2 rounded-full bg-slate-200 sm:top-6" />
+      <span aria-hidden className="absolute left-[10%] top-5 h-1 -translate-y-1/2 rounded-full bg-pink-500 transition-all duration-700 sm:top-6"
+        style={{ width: `${(filled / 4) * 80}%` }} />
       {STAGES.map((s) => {
         const done = journey.stagesDone[s.n];
         const current = journey.currentStage === s.n && !done;
         return (
-          <li key={s.n} className="flex flex-col items-center text-center">
+          <li key={s.n} className="relative flex flex-col items-center text-center">
             <Link href={s.href} aria-label={`Etapa ${s.n}: ${s.title} — ${done ? "concluída" : current ? "em andamento" : "bloqueada"}`}
               className={`grid h-10 w-10 place-items-center rounded-full text-sm font-bold transition sm:h-12 sm:w-12 ${
                 done ? "bg-solar-400 text-navy-950 shadow-md shadow-solar-500/30"

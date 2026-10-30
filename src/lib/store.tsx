@@ -35,6 +35,7 @@ interface Store extends PersistedState {
   completeOnboarding: (p: Profile, extra?: Record<string, unknown>) => void;
   submitQuiz: (moduleId: string, score: number) => { passed: boolean; xp: number };
   requestMentor: (mentorId: string, affinity: number) => void;
+  connectLinkedin: (url: string) => void;
   applyJob: (jobId: string, pct: number) => void;
   addJob: (job: Job) => void;
   mergeJobs: (jobs: Job[]) => void;
@@ -130,6 +131,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, [state.mentorRequests, state.profile, gainXp]);
 
+  const connectLinkedin = useCallback((url: string) => {
+    const first = !state.profile.linkedin_url;
+    const g = first ? gainXp(state.profile, 50) : null; // primeira conexão do LinkedIn = +50 XP
+    const profile = { ...(g ? g.profile : state.profile), linkedin_url: url };
+    setState((s) => ({ ...s, profile }));
+    repo.saveProfile(profile);
+    if (g) {
+      setCelebration({
+        title: g.levelUp ? `Nível ${g.levelUp} desbloqueado!` : "Perfil profissional conectado!",
+        subtitle: "Seu LinkedIn agora faz parte do seu perfil privado.",
+        xp: 50, levelUp: g.levelUp,
+      });
+    }
+  }, [state.profile, gainXp]);
+
   const value: Store = {
     ...state, hydrated, isDemo: isDemoMode, modules, jobs, journey, skills, celebration,
     setView: (view) => setState((s) => ({ ...s, view })),
@@ -149,6 +165,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
     submitQuiz,
     requestMentor,
+    connectLinkedin,
     applyJob: (jobId, pct) => {
       setState((s) => (s.appliedJobs.includes(jobId) ? s : { ...s, appliedJobs: [...s.appliedJobs, jobId] }));
       repo.saveApplication(jobId, pct);
